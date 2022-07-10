@@ -1,36 +1,40 @@
 package org.example.slowotlokbackendspring;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
 public class CardController {
-
-    private List<CardEntity> cards = new ArrayList<>();
+    @Autowired
+    private CardRepository repo;
 
     @GetMapping(path = "cards")
     public List<CardEntity> getCards() {
-        return cards;
+        return repo.findAll();
     }
 
     @PostMapping(path = "cards")
     public CardEntity addCard(@RequestBody AddCardRequest request) {
         CardEntity cardEntity = CardEntity.builder()
-                .id(cards.size())
                 .bad(0)
                 .good(0)
                 .src(request.src)
                 .translation(request.tr)
                 .build();
-        cards.add(cardEntity);
+        repo.save(cardEntity);
         return cardEntity;
     }
 
+    @GetMapping(path = "cards/{id}")
+    public CardEntity getCard(@PathVariable Long id) {
+        return repo.findById(id).orElse(new CardEntity());
+    }
 
-    @GetMapping(path="cards/{id}")
-    public CardEntity getCard(@PathVariable int id) {
-        return cards.get(id);
+    @DeleteMapping(path = "cards/{id}")
+    public void delCard(@PathVariable Long id) {
+        repo.deleteAllById(Arrays.asList(id));
     }
 }
